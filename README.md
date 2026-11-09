@@ -54,7 +54,7 @@ flowchart LR
 - **Aplicação:** `IFloodReportService` e `IFloodReportRepository` isolam responsabilidades; `FloodReportService` coordena as regras.
 - **Persistência:** `EfFloodReportRepository` aplica filtros, ordenação e materialização assíncrona com LINQ/EF Core. Horários são armazenados como Unix milliseconds para que o SQLite consiga ordená-los.
 - **API:** `ReportsController` expõe rotas REST e usa DTOs com validação. Injeção de dependência é configurada em `Program.cs`; `ApiExceptionHandler` converte erros de domínio em `ProblemDetails`.
-- **Testes:** `Alertasp.Tests` cobre regras do domínio e do serviço com repositório substituto.
+- **Testes:** `Alertasp.Tests` cobre regras do domínio e do serviço com repositório substituto e integrações HTTP com SQLite em arquivo.
 
 ## Requisitos
 
@@ -112,13 +112,13 @@ dotnet tool run dotnet-ef migrations add NomeDaAlteracao --project src/Alertasp.
 
 ## Testes e evidências verificadas
 
-Execute os testes unitários com:
+Execute testes unitários e de integração com:
 
 ```bash
 dotnet test Alertasp.sln
 ```
 
-Nesta versão, o build concluiu sem warnings e os **4 testes unitários passaram**. O smoke test local também verificou: Swagger `200`; criação `201`; leitura, filtro e mudança de situação `200`; payload inválido `400`; ID inexistente `404`; registro preservado após reinício. A auditoria NuGet não reportou pacotes vulneráveis nas fontes consultadas em 09/11/2026.
+Nesta versão, build Debug e Release concluíram sem warnings; os **6 testes passaram** (4 unitários e 2 de integração). Os testes de integração verificam Swagger, cadastro, filtro positivo/negativo, mudança de situação, `404`, coordenadas fora do intervalo, horário futuro e persistência depois de encerrar e recriar o host contra o mesmo arquivo SQLite. O smoke test em Kestrel confirmou os mesmos principais fluxos HTTP. A auditoria NuGet não reportou pacotes vulneráveis nas fontes consultadas em 09/11/2026.
 
 Para reproduzir a verificação manual, inicie a API e use os exemplos em Swagger. A evidência de persistência deve mostrar a consulta do mesmo ID antes e depois de reiniciar o processo. A equipe ainda precisa anexar capturas de tela da execução à entrega se a tarefa do Teams as exigir.
 
@@ -127,10 +127,10 @@ Para reproduzir a verificação manual, inicie a API e use os exemplos em Swagge
 | Critério | Peso | Implementação e evidência | Limite atual |
 | --- | ---: | --- | --- |
 | POO | 3,0 | Entidade encapsulada, enums e regras; testes de validação | O domínio precisa ser validado com cidadãos e com a linguagem do professor |
-| Web API | 2,5 | Rotas REST, DTOs, Swagger, validação e códigos HTTP; smoke test acima | Não há autenticação; não publicar aberta à internet como serviço de produção |
-| EF Core + LINQ | 1,5 | SQLite, migration, filtro/ordenação no banco e persistência após reinício | Não importa feeds públicos nem histórico real |
-| Async/Await | 1,0 | I/O assíncrona com `CancellationToken` | Cobertura de persistência é smoke test manual; testes unitários isolam o repositório |
-| Qualidade do código | 2,0 | DI por interfaces, handler global, README, prompts e testes | Autorização/moderação e limites de uso não fazem parte do protótipo |
+| Web API | 2,5 | Rotas REST, DTOs, Swagger, validação e códigos HTTP; testes de integração e Kestrel | Não há autenticação; não publicar aberta à internet como serviço de produção |
+| EF Core + LINQ | 1,5 | SQLite, migration, filtro/ordenação no banco e reinício do host nos testes | Não importa feeds públicos nem histórico real |
+| Async/Await | 1,0 | I/O assíncrona com `CancellationToken`; rotas exercitadas via integração | Testes unitários isolam regras do serviço; integração cobre persistência e HTTP |
+| Qualidade do código | 2,0 | DI por interfaces, handler global, README, prompts e 6 testes | Autorização/moderação e limites de uso não fazem parte do protótipo |
 
 ## Segurança e limitações
 
@@ -144,7 +144,7 @@ Para reproduzir a verificação manual, inicie a API e use os exemplos em Swagge
 
 ```text
 src/Alertasp.Api/       API, domínio, aplicação, persistência e migrations
-tests/Alertasp.Tests/   testes unitários
+tests/Alertasp.Tests/   testes unitários e de integração
 dotnet-tools.json       pin da ferramenta dotnet-ef
 global.json             pin do SDK .NET
 prompts.md              registro de uso de IA para revisão da equipe

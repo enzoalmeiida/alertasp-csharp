@@ -11,7 +11,10 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
         var title = isClientError ? "Dados inválidos" : "Erro interno";
         var detail = isClientError ? exception.Message : "Não foi possível concluir a solicitação.";
 
-        logger.LogError(exception, "Falha ao processar a solicitação HTTP.");
+        if (isClientError)
+            logger.LogInformation("Solicitação rejeitada por uma regra de validação.");
+        else
+            logger.LogError(exception, "Falha ao processar a solicitação HTTP.");
         await Results.Problem(statusCode: statusCode, title: title, detail: detail).ExecuteAsync(httpContext);
         return true;
     }
