@@ -1,10 +1,8 @@
 # ALERTASP — API de ocorrências de alagamento
 
-API demonstrativa independente para registrar e consultar relatos de alagamento no município de São Paulo. É a entrega da disciplina **C# Software Development — FIAP Global Solution 2026.2** e implementa a parte C# do projeto CitizenTech ALERTASP.
+API demonstrativa independente para registrar e consultar relatos de alagamento no município de São Paulo. Entrega da disciplina **C# Software Development — FIAP Global Solution 2026.2** e implementa a parte C# do projeto CitizenTech ALERTASP.
 
 > Esta versão não consome dados do CGE, GeoSampa, sensores ou previsões. O banco começa vazio, e relatos não representam informação oficial nem monitoramento em tempo real.
-
-**Prazo informado para a Global Solution:** 19/11/2026, às 23h55.
 
 ## Equipe
 
@@ -152,10 +150,3 @@ global.json             pin do SDK .NET
 prompts.md              registro de uso de IA para revisão da equipe
 ```
 
-## Validações da equipe antes da entrega
-
-1. Conferir a tarefa do Teams e os conteúdos/ferramentas usados em aula.
-2. Registrar observação territorial e conversas com cidadãos sem guardar dados pessoais.
-3. Confirmar com o professor se esta Web API satisfaz a parte de Operating Systems.
-4. Anexar capturas da API, dos testes e da persistência reiniciada; identificar todos os dados sintéticos.
-5. Fazer cada integrante executar e explicar a solução antes da apresentação.
