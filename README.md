@@ -1,8 +1,10 @@
 # ALERTASP — API de ocorrências de alagamento
 
-Projeto da disciplina **C# Software Development — FIAP Global Solution 2026.2**. Esta entrega independente permite registrar e consultar ocorrências de alagamento em São Paulo. Ela não consome CGE, GeoSampa ou sensores e não apresenta relatos como dados em tempo real.
+API demonstrativa independente para registrar e consultar relatos de alagamento no município de São Paulo. É a entrega da disciplina **C# Software Development — FIAP Global Solution 2026.2** e implementa a parte C# do projeto CitizenTech ALERTASP.
 
-**Entrega geral informada pela equipe:** 19/11/2026 às 23h55. Confirme a tarefa da disciplina no Teams.
+> Esta versão não consome dados do CGE, GeoSampa, sensores ou previsões. O banco começa vazio, e relatos não representam informação oficial nem monitoramento em tempo real.
+
+**Prazo informado para a Global Solution:** 19/11/2026, às 23h55.
 
 ## Equipe
 
@@ -12,22 +14,55 @@ Projeto da disciplina **C# Software Development — FIAP Global Solution 2026.2*
 
 ## Ficha CitizenTech
 
-- **Território:** município de São Paulo; distrito e via são informados em cada ocorrência.
-- **Cidadão beneficiado:** pessoa que precisa decidir por onde circular durante chuva intensa.
-- **Problema:** falta uma consulta simples e localizada que indique a situação e o horário observado de registros de alagamento.
-- **Solução desta entrega:** API para registrar, consultar e atualizar relatos, mantendo origem, horário observado e última atualização visíveis.
-- **ODS relacionados:** ODS 11 e 13 como referências de cidades resilientes e ação climática; ODS 3 como benefício complementar de segurança. O protótipo não mede impacto nem prova redução de acidentes.
+- **Território:** município de São Paulo; os registros da API identificam via e distrito.
+- **Cidadão beneficiado:** pessoa que precisa decidir por onde circular durante chuvas intensas.
+- **Problema, em uma frase:** quem circula pela cidade precisa consultar relatos localizados de alagamento com situação, origem e horário observável.
+- **Solução desta entrega:** API para registrar relatos, consultá-los por distrito e situação e atualizar o estado informado.
+- **ODS:** ODS 11 e 13 orientam a contribuição esperada para resiliência urbana e informação sobre riscos climáticos; ODS 3 é complementar pela relação com segurança. Esta versão não mede impacto e não comprova redução de acidentes.
 
-## Escopo e confiabilidade dos dados
+O problema é uma hipótese de produto. A equipe ainda precisa registrar observação territorial e conversas com pessoas afetadas antes de afirmar que validou a necessidade.
 
-O banco começa vazio. A API aceita três origens: `Citizen`, `PublicAgency` e `SyntheticDemo`. `PublicAgency` apenas identifica a origem informada pelo cliente; não significa integração ou verificação com um órgão. Use `SyntheticDemo` em demonstrações. Não envie nome, telefone, imagem de rosto ou outra informação pessoal. `ObservedAt` é quando o evento foi observado; `CreatedAt` e `UpdatedAt` são carimbos do sistema. Dados históricos do GeoSampa não são tratados como tempo real.
+## Escopo, origem e confiabilidade dos dados
 
-Antes da apresentação, a equipe deve observar um território e conversar com pessoas que convivem com o problema; este repositório não afirma que essa pesquisa já ocorreu. Confirme no Teams se a tarefa do professor acrescenta critérios.
+A API aceita `Citizen`, `PublicAgency` e `SyntheticDemo` como origem declarada pelo cliente. O campo identifica apenas o que quem enviou o registro informou; ele não autentica a pessoa nem verifica se uma agência realmente produziu o dado. Os status `Reported`, `Confirmed` e `Cleared` também são declarações do sistema, sem integração de verificação externa.
+
+`ObservedAt` informa quando o evento teria sido observado. `CreatedAt` e `UpdatedAt` são horários registrados pela API em UTC. A API não recebe nome, telefone ou outro identificador pessoal. Use somente dados sintéticos ou públicos na demonstração.
+
+### Fontes de contexto e limites de uso
+
+As fontes abaixo orientam o contexto do projeto; **nenhuma é carregada automaticamente pela aplicação**. As páginas e metadados foram consultados em 09/11/2026.
+
+| Fonte | Período, unidade e cobertura | Atualização | Limitações para este projeto |
+| --- | --- | --- | --- |
+| [CGE — pontos de alagamento](https://www.cgesp.org/v3/alagamentos.jsp) | Painel operacional de pontos monitorados no município; unidade é o ponto registrado e sua classificação de transitabilidade | A página apresenta o estado operacional consultado; não informa garantia de latência para cada atualização | O briefing do projeto informa prioridade de registros de agentes em vias principais e corredores. Ausência de ponto no painel não prova que uma via esteja seca. Não é um inventário completo da cidade nem um feed de sensores. |
+| [GeoSampa](https://geosampa.prefeitura.sp.gov.br/) — ocorrências históricas | O briefing do projeto descreve registros de ocorrências desde 2013, em cobertura municipal; unidade é o registro geográfico da ocorrência | O briefing informa atualização mensal por ETL sem sincronismo em tempo real | A camada e o dicionário exatos devem ser conferidos no portal antes de qualquer importação. Histórico não deve ser apresentado como situação atual. |
+| [Prefeitura de São Paulo — manutenção e conservação de galerias](https://dados.prefeitura.sp.gov.br/dataset/manutencao-e-conservacao-de-galerias) | CSVs mensais de janeiro a setembro de 2026; registros de serviços, com campos `SERVIÇO`, `MEDIDA` e `TOTAL`; cobertura declarada: Guaianases e Lajeado | Catálogo informa atualização mensal; metadados consultados em 21/10/2026 | Mede intervenções de manutenção, não ocorrências de alagamento. A medida varia por serviço e não permite inferir causalidade ou condição de uma rua específica. A cobertura não representa toda a cidade. |
+| [IBGE — São Paulo (município)](https://www.ibge.gov.br/cidades-e-estados/sp/sao-paulo.html) | Estimativa populacional de 2026: **11.911.337 pessoas**, para o município | Estimativa anual; valor consultado em 09/11/2026 | É estimativa municipal, não contagem censitária nem dado de rua. Serve apenas como contexto e não é usado para calcular risco nesta API. |
+
+Fontes oficiais candidatas para pesquisa futura: [INMET — dados históricos](https://portal.inmet.gov.br/dadoshistoricos), [Cemaden — monitoramento](https://www.gov.br/cemaden/pt-br/assuntos/monitoramento), [Defesa Civil de São Paulo](https://prefeitura.sp.gov.br/web/defesa_civil), [SP-Águas](https://www.spaguas.sp.gov.br/site/) e [SP156](https://sp156.prefeitura.sp.gov.br/portal/servicos). Elas não estão integradas nesta entrega; antes de usar dados, registre estação/camada, intervalo de observação, unidade, cobertura, data de consulta e limitações.
+
+## Arquitetura e conceitos da disciplina
+
+```mermaid
+flowchart LR
+    Client[Cliente HTTP] --> Controller[ReportsController]
+    Controller --> Service[IFloodReportService]
+    Service --> Repository[IFloodReportRepository]
+    Repository --> EF[EF Core / AppDbContext]
+    EF --> SQLite[(SQLite)]
+```
+
+- **Domínio:** `FloodReport` protege campos e valida coordenadas, horário observado e transição de situação. `ReportStatus` e `ReportSource` tornam os valores explícitos.
+- **Aplicação:** `IFloodReportService` e `IFloodReportRepository` isolam responsabilidades; `FloodReportService` coordena as regras.
+- **Persistência:** `EfFloodReportRepository` aplica filtros, ordenação e materialização assíncrona com LINQ/EF Core. Horários são armazenados como Unix milliseconds para que o SQLite consiga ordená-los.
+- **API:** `ReportsController` expõe rotas REST e usa DTOs com validação. Injeção de dependência é configurada em `Program.cs`; `ApiExceptionHandler` converte erros de domínio em `ProblemDetails`.
+- **Testes:** `Alertasp.Tests` cobre regras do domínio e do serviço com repositório substituto.
 
 ## Requisitos
 
-- .NET SDK 10.0.100 (ou SDK 10.x compatível), SQLite local e acesso ao NuGet no primeiro restore.
-- Linux, macOS ou Windows com runtime ASP.NET Core compatível.
+- .NET SDK **10.0.100** (fixado em `global.json`; outro SDK 10.x pode ser usado após revisar o pin).
+- SQLite local; o provider é incluído pelo projeto, sem instalar um servidor de banco.
+- Acesso ao NuGet no primeiro restore.
 
 ## Executar
 
@@ -38,33 +73,38 @@ dotnet restore Alertasp.sln
 dotnet run --project src/Alertasp.Api
 ```
 
-Abra `http://localhost:5080/swagger` para explorar a documentação. A aplicação aplica as migrations ao iniciar e cria `alertasp.db` no diretório de execução. Reiniciar o servidor preserva os registros. Para parar, use Ctrl+C.
-
-### Exemplo de demonstração sintética
-
-```bash
-curl -i -X POST http://localhost:5080/api/reports \
-  -H 'Content-Type: application/json' \
-  -d '{"roadName":"Avenida de demonstração","district":"Sé","latitude":-23.5505,"longitude":-46.6333,"observedAt":"2026-11-08T12:00:00Z","source":"SyntheticDemo"}'
-```
-
-O exemplo é sintético, não é ocorrência real e deve ser substituído por data/hora apropriada à demonstração. A resposta `201 Created` inclui o identificador e os horários do sistema.
+Abra [Swagger](http://localhost:5080/swagger) para explorar os endpoints. O banco é criado em `src/Alertasp.Api/alertasp.db` quando executado pelo comando acima; migrations são aplicadas automaticamente ao iniciar. O SQLite mantém os registros após reiniciar a API. Para parar, use Ctrl+C.
 
 ## Endpoints
 
-| Método e rota | Uso | Respostas principais |
+| Método e rota | Descrição | Respostas principais |
 | --- | --- | --- |
-| `GET /api/reports?district=Sé&status=Reported` | Lista por distrito/situação, mais recentes primeiro | `200` |
-| `GET /api/reports/{id}` | Consulta um registro | `200`, `404` |
-| `POST /api/reports` | Cria um relato; não recebe dados pessoais | `201`, `400` |
-| `PATCH /api/reports/{id}/status` | Atualiza para `Reported`, `Confirmed` ou `Cleared` | `200`, `400`, `404` |
-| `GET /health` | Verifica processo HTTP | `200` |
+| `GET /api/reports?district=Sé&status=Reported` | Lista registros, opcionalmente filtrados por distrito exato e situação; ordena por `ObservedAt` mais recente | `200` |
+| `GET /api/reports/{id}` | Consulta por identificador | `200`, `404` |
+| `POST /api/reports` | Cria relato, inicialmente em `Reported` | `201`, `400` |
+| `PATCH /api/reports/{id}/status` | Altera situação para `Reported`, `Confirmed` ou `Cleared` | `200`, `400`, `404` |
+| `GET /health` | Verifica se o processo HTTP está respondendo | `200` |
 
-Exemplo de corpo para mudança de situação: `{"status":"Confirmed"}`.
+`POST` exige `roadName`, `district`, latitude entre -90 e 90, longitude entre -180 e 180, `observedAt` em ISO 8601 não futuro e `source` (`Citizen`, `PublicAgency` ou `SyntheticDemo`). Exemplo de corpo:
+
+```json
+{
+  "roadName": "Via de demonstração",
+  "district": "Sé",
+  "latitude": -23.5505,
+  "longitude": -46.6333,
+  "observedAt": "2026-01-15T12:00:00Z",
+  "source": "SyntheticDemo"
+}
+```
+
+O exemplo é fictício, não é ocorrência real. O `201 Created` inclui o ID gerado, situação inicial, origem e horários. Para alterar a situação, envie `{"status":"Confirmed"}` ao endpoint `PATCH`.
+
+Erros de validação e de regra de domínio retornam `400`; identificadores inexistentes retornam `404`; erros inesperados retornam `500` sem expor detalhes internos.
 
 ## Persistência e migrations
 
-EF Core usa SQLite em `alertasp.db`; consultas aplicam filtro e ordenação via LINQ no banco, com `AsNoTracking` e `ToListAsync`. Os horários são persistidos em Unix milliseconds para que o SQLite ordene as ocorrências. O startup executa `Database.MigrateAsync()`. Para criar uma migration após alterar o modelo:
+O provider EF Core SQLite grava em `alertasp.db`. O startup executa `Database.MigrateAsync()`; o repositório inclui a migration inicial. Para criar outra migration após alterar o modelo:
 
 ```bash
 dotnet tool restore
@@ -72,47 +112,50 @@ dotnet build Alertasp.sln
 dotnet tool run dotnet-ef migrations add NomeDaAlteracao --project src/Alertasp.Api --no-build
 ```
 
-## Testes e critérios de aceite
+## Testes e evidências verificadas
+
+Execute os testes unitários com:
 
 ```bash
 dotnet test Alertasp.sln
 ```
 
-Os testes unitários exercitam validação de coordenadas/horário, criação e situação inicial, e a atualização de um identificador ausente. Critérios para demonstração manual: Swagger abre; criação retorna `201`; consulta retorna o mesmo ID; filtros respeitam distrito/situação; status pode ser alterado; após reiniciar, o registro continua no SQLite; payload inválido retorna `400`; ID ausente retorna `404`.
+Nesta versão, o build concluiu sem warnings e os **4 testes unitários passaram**. O smoke test local também verificou: Swagger `200`; criação `201`; leitura, filtro e mudança de situação `200`; payload inválido `400`; ID inexistente `404`; registro preservado após reinício. A auditoria NuGet não reportou pacotes vulneráveis nas fontes consultadas em 09/11/2026.
 
-## Como os critérios aparecem no código
+Para reproduzir a verificação manual, inicie a API e use os exemplos em Swagger. A evidência de persistência deve mostrar a consulta do mesmo ID antes e depois de reiniciar o processo. A equipe ainda precisa anexar capturas de tela da execução à entrega se a tarefa do Teams as exigir.
 
-| Critério | Peso | Implementação | Evidência verificada | Risco/pendência |
-| --- | ---: | --- | --- | --- |
-| POO | 3,0 | `FloodReport` encapsula invariantes e mudança de situação; enums e DTOs separam conceitos | Quatro testes unitários passam, incluindo coordenadas e horário | Validar se os estados cobrem a linguagem usada na aula e pelo cidadão |
-| Web API | 2,5 | Controller REST, DTOs, validação, códigos HTTP e Swagger | Smoke test: Swagger 200; POST 201; GET/PATCH 200; inválido 400; ID ausente 404 | Sem autenticação por escopo; confirmar se a atividade pede algo adicional |
-| EF Core + LINQ | 1,5 | SQLite persistente, repositório, filtros/ordenação LINQ e migration inicial | Filtro retornou o resultado esperado; registro sobreviveu ao reinício | Nenhuma fonte pública real está integrada; banco de protótipo local |
-| Async/Await | 1,0 | Operações de persistência assíncronas com `CancellationToken` | Rotas funcionais exercitadas contra SQLite | Testes unitários isolam persistência; smoke test cobre o caminho real |
-| Qualidade do código | 2,0 | DI por interfaces, handler global de erros, sem PII, README e prompts | Build sem warnings, 4 testes aprovados e auditoria NuGet sem vulnerabilidades conhecidas | Faltam pesquisa territorial comprovada, nomes da equipe e capturas de evidência |
+## Cobertura da rubrica da página 30
 
-## Dependências entre disciplinas
+| Critério | Peso | Implementação e evidência | Limite atual |
+| --- | ---: | --- | --- |
+| POO | 3,0 | Entidade encapsulada, enums e regras; testes de validação | O domínio precisa ser validado com cidadãos e com a linguagem do professor |
+| Web API | 2,5 | Rotas REST, DTOs, Swagger, validação e códigos HTTP; smoke test acima | Não há autenticação; não publicar aberta à internet como serviço de produção |
+| EF Core + LINQ | 1,5 | SQLite, migration, filtro/ordenação no banco e persistência após reinício | Não importa feeds públicos nem histórico real |
+| Async/Await | 1,0 | I/O assíncrona com `CancellationToken` | Cobertura de persistência é smoke test manual; testes unitários isolam o repositório |
+| Qualidade do código | 2,0 | DI por interfaces, handler global, README, prompts e testes | Autorização/moderação e limites de uso não fazem parte do protótipo |
 
-A entrega C# é executável por conta própria; depende de .NET, NuGet no primeiro restore e SQLite local. Não depende tecnicamente do Mobile, SOA, IA/ML, IoT ou Cybersecurity, embora todas compartilhem a definição do ALERTASP. Para Operating Systems, esta Web API é candidata a aplicação web hospedada em Linux, mas confirmem com o professor se a API sozinha atende ao enunciado ou se ele espera uma interface web. Não aleguem integração entre as entregas enquanto ela não existir.
+## Segurança e limitações
 
-## Etapas restantes e conclusão
+- API sem autenticação ou autorização: qualquer cliente que alcance o servidor pode criar relatos e alterar situações. Restrinja o uso a demonstração local; antes de expor publicamente, implemente autenticação, autorização/moderação e controles contra abuso.
+- `PublicAgency` é uma etiqueta enviada pelo cliente, não prova de origem oficial. `Confirmed` também não é confirmação por órgão.
+- O banco SQLite é local e começa vazio; não há carga inicial, backup ou serviço remoto configurado.
+- Não há interface cidadã neste projeto. Para a atividade de Operating Systems, confirme com o professor se hospedar apenas esta Web API cumpre o requisito de aplicação web.
+- Este protótipo não substitui alertas oficiais, Defesa Civil ou orientação de emergência.
 
-1. Conferir no Teams se a tarefa acrescenta requisitos e confirmar com o professor a compatibilidade da API com Operating Systems.
-2. Fazer observação territorial e conversas com cidadãos; registrar fonte, contexto e limitações sem guardar dados pessoais.
-3. Executar os critérios de aceite acima com dados `SyntheticDemo`, capturar Swagger, respostas HTTP, testes e persistência após reinício.
-4. Revisar README, adicionar integrantes e evidências verificáveis; cada integrante deve conseguir explicar os arquivos e as regras.
-5. Simular a rubrica e fechar pendências antes de 19/11/2026 às 23h55.
-
-## Estrutura
+## Estrutura do repositório
 
 ```text
 src/Alertasp.Api/       API, domínio, aplicação, persistência e migrations
 tests/Alertasp.Tests/   testes unitários
-prompts.md              registro de uso de IA para revisão pela equipe
+dotnet-tools.json       pin da ferramenta dotnet-ef
+global.json             pin do SDK .NET
+prompts.md              registro de uso de IA para revisão da equipe
 ```
 
-## Pendências antes de entregar
+## Validações da equipe antes da entrega
 
-- Validar o escopo com a tarefa do Teams e a versão/ferramentas efetivamente usadas em aula.
-- Fazer observação territorial e conversas com cidadãos; registrar evidências reais sem dados pessoais.
-- Adicionar nomes dos integrantes, capturas da API/testes e evidências de persistência ao pacote de entrega.
-- Rever os endpoints com a equipe e demonstrar que todos sabem explicar as regras e cada parte do código.
+1. Conferir a tarefa do Teams e os conteúdos/ferramentas usados em aula.
+2. Registrar observação territorial e conversas com cidadãos sem guardar dados pessoais.
+3. Confirmar com o professor se esta Web API satisfaz a parte de Operating Systems.
+4. Anexar capturas da API, dos testes e da persistência reiniciada; identificar todos os dados sintéticos.
+5. Fazer cada integrante executar e explicar a solução antes da apresentação.
