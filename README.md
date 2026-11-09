@@ -4,6 +4,12 @@ Projeto da disciplina **C# Software Development — FIAP Global Solution 2026.2*
 
 **Entrega geral informada pela equipe:** 19/11/2026 às 23h55. Confirme a tarefa da disciplina no Teams.
 
+## Equipe
+
+- Enzo Almeida — RM556900
+- Gabriel Mello — RM554421
+- Guilherme Moreira — RM557290
+
 ## Ficha CitizenTech
 
 - **Território:** município de São Paulo; distrito e via são informados em cada ocorrência.
